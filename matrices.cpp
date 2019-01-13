@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <random>
-#include "neuralnets.hpp"
+#include "neuralnet.hpp"
 
 using namespace std;
 

@@ -4,6 +4,7 @@
 using namespace std;
 
 typedef double nntype;
+typedef unsigned char uchar;
 
 class matrix {
 	public:
@@ -25,10 +26,15 @@ class neural_net {
 		vector<int> shape;
 		int inputs;
 		vector<matrix> weights;
-		neural_net (vector<int> , int);
+		nntype step_size;
+		nntype differential;
+		neural_net (vector<int> , int, nntype, nntype);
 		vector<nntype> activation(vector<nntype>);
+		nntype ReLU (nntype);
 		nntype error_datum (vector<nntype>, vector<nntype>);
 		nntype error_data (vector< vector<nntype> >, vector< vector<nntype> >);
-		nntype partial_derivative_num
-		(vector<nntype>, vector<nntype>, vector<int>, nntype);
+		nntype partial_derivative_num (vector<nntype>, vector<nntype>, vector<int>);
+		void learn(vector<nntype>, vector<nntype>);
 };
+
+uchar** read_mnist_images(int&, int&);
