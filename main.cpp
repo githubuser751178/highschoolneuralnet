@@ -4,6 +4,8 @@
 #include "neuralnets.hpp"
 using namespace std;
 
+typedef double nntype;
+
 int main () {
   matrix m1 (2,2);
 	vector< vector<int> > a;
