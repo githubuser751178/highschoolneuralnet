@@ -9,10 +9,10 @@ matrix::matrix(int r, int c){
 	rows = r;
 	columns = c;
 	vector<double> dummy;
-		for(int i=0; i<columns; i++)
-			dummy.push_back(0);
-		for(int i=0; i<rows; i++)
-			m.push_back(dummy);
+	for(int i=0; i<columns; i++)
+		dummy.push_back(0);
+	for(int i=0; i<rows; i++)
+		m.push_back(dummy);
 }
 double matrix::e(int i, int j){
 	return m[i][j];
