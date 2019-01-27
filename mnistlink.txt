@@ -1,0 +1,3 @@
+The MNIST files exceed Github's 100MB so here is the link:
+
+https://pjreddie.com/projects/mnist-in-csv/
