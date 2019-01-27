@@ -14,11 +14,13 @@ neural_net::neural_net(vector<int> s, int i, nntype ss, nntype diff){
 	matrix blankweight1 (inputs, shape[0]);
 	blankweight1.randomize();
 	weights.push_back(blankweight1);
+	corrections.push_back(blankweight1);
 	for(int i = 1; i < shape.size(); i++){
 		matrix blankweight (shape[i - 1], shape[i]);
 		blankweight.randomize();
 		weights.push_back(blankweight);
-	} 
+		corrections.push_back(blankweight);
+	}
 }
 nntype neural_net::ReLU(nntype x){
 	if(x >= 0) return x; else return 0;
@@ -51,56 +53,68 @@ nntype neural_net::error_data
 	return total_e;
 }
 
-nntype neural_net::partial_derivative_num
-(vector<nntype> x, vector<nntype> target, vector<int> mrc){
-	// mrc stands for matrix row column
+nntype neural_net::partial_derivative_num (vector<nntype> x, vector<nntype> target, nntype &weight){
 	nntype error = error_datum(x, target);
-	weights[mrc[0]].set_element
-		(mrc[1], mrc[2], weights[mrc[0]].e(mrc[1], mrc[2]) + differential);
+	weight += differential;
 	nntype error_plus_h = error_datum(x, target);
-	weights[mrc[0]].set_element
-		(mrc[1], mrc[2], weights[mrc[0]].e(mrc[1], mrc[2]) - differential);
+	weight -= differential;
 	return (error_plus_h - error) / differential;
 }
 void neural_net::learn(vector<nntype> x, vector<nntype> target){
-	vector<int> coord = {0, 0, 0};
+	//updates corrections for one training image
 	for(int i = 0; i < weights.size(); i++){
-		coord[0] = i;
 		for(int j = 0; j < weights[i].rows; j++){
-			coord[1] = j;
 			for(int k = 0; k < weights[i].columns; k++){
-				coord[2] = k;
-				nntype partial = partial_derivative_num(x, target, coord);
-				weights[i].set_element(j, k, weights[i].e(j, k) - (step_size * partial));
+				nntype partial = partial_derivative_num(x, target, weights[i].m[j][k]);
+				corrections[i].set_element(j, k, corrections[i].e(j, k) - (step_size * partial));
 			}
 		}
 	}
 }
-int neural_net::digit (vector<nntype> output){
+int neural_net::vectordigit (vector<nntype> output){
 	nntype max = *max_element(output.begin(), output.end());
 	for (int i = 0; i < output.size(); i++){
 		if (output[i] == max)
 			return i;
 	}
+	return -1;
 }
 
-int neural_net::identify (vector<nntype> pixels){
-	return digit(activation(pixels));
-}
-void neural_net::train (vector<train_img> train_set){
-	int correct = 0;
-	for (int i = 0; i < train_set.size(); i++){
-		vector<nntype> target;
-		for (int j = 0; j < 10; j++){
-			if (j == train_set[i].label)
-				target.push_back(1);
-			else
-				target.push_back(0);
-		}
-		if (identify(train_set[i].pixels) == train_set[i].label)
-			correct += 1;
-		learn(train_set[i].pixels, target);
+vector<nntype> neural_net::digitvector (nntype digit){
+	vector<nntype> v;
+	for (int i = 0; i < 10; i++) {
+		if (i == digit)
+			v.push_back(1);
+		else
+			v.push_back(0);
 	}
-	cout << "Percent Correct: " << (100 * (correct / train_set.size())) << endl;
+	return v;
 }
-
+int neural_net::identify (vector<nntype> pixels){
+	return vectordigit(activation(pixels));
+}
+void neural_net::train (vector<train_img> batch){
+	nntype correct = 0;
+	for (int i = 0; i < corrections.size(); i++)
+		corrections[i].zero();
+	for (int i = 0; i < batch.size(); i++){
+		vector<nntype> target;
+		target = digitvector (batch[i].label);
+		if (identify(batch[i].pixels) == batch[i].label)
+			correct += 1;
+		learn(batch[i].pixels, target);
+	}
+	cout << "Percent Correct: " << (100 * (correct / batch.size())) << endl;
+	for (int i = 0; i < corrections.size(); i++)
+		weights[i] = weights[i].plus(corrections[i]);
+}
+nntype neural_net::test (vector<train_img> batch){
+	nntype correct = 0;
+	for (int i = 0; i < batch.size(); i++){
+		vector<nntype> target;
+		target = digitvector (batch[i].label);
+		if (identify(batch[i].pixels) == batch[i].label)
+			correct += 1;
+	}
+	return (100 * (correct / batch.size()));
+}

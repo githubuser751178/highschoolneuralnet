@@ -10,16 +10,17 @@ class matrix {
 	public:
 		int rows, columns;
 		//vector< <vector<nntype> > m;
-		vector< vector<double> > m;
+		vector< vector<nntype> > m;
 		matrix (int,int);
-		void set_element (int,int,double);
+		void set_element (int,int,nntype);
 		void randomize ();
-		vector<double> timesV(vector<double>);
-		vector<double> get_column(int);
-		double e(int,int);
+		void zero ();
+		vector<nntype> timesV(vector<nntype>);
+		vector<nntype> get_column(int);
+		nntype e(int,int);
 		matrix times(matrix);
 		matrix plus(matrix);
-		matrix scalar_times(double);
+		matrix scalar_times(nntype);
 };
 
 class train_img {
@@ -34,6 +35,7 @@ class neural_net {
 		vector<int> shape;
 		int inputs;
 		vector<matrix> weights;
+		vector<matrix> corrections;
 		nntype step_size;
 		nntype differential;
 		neural_net (vector<int> , int, nntype, nntype);
@@ -41,10 +43,12 @@ class neural_net {
 		nntype ReLU (nntype);
 		nntype error_datum (vector<nntype>, vector<nntype>);
 		nntype error_data (vector< vector<nntype> >, vector< vector<nntype> >);
-		nntype partial_derivative_num (vector<nntype>, vector<nntype>, vector<int>);
+		nntype partial_derivative_num (vector<nntype>, vector<nntype>, nntype &);
 		void learn (vector<nntype>, vector<nntype>);
-		int digit (vector<nntype>);
+		int vectordigit (vector<nntype>);
+		vector<nntype> digitvector (nntype digit);
 		int identify (vector<nntype>);
 		void train (vector<train_img>);
+		nntype test (vector<train_img>);
 };
-vector<train_img> read_mnist();
+vector<train_img> read_mnist(string);
