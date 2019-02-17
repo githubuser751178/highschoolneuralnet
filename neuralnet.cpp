@@ -34,6 +34,7 @@ vector<nntype> neural_net::activation(vector<nntype> input){
 				current[j] = ReLU(current[j]);
 			}
 		}
+		if (i == 0) between_layers = current;
 	}
 	return current;
 }
@@ -60,16 +61,42 @@ nntype neural_net::partial_derivative_num (vector<nntype> x, vector<nntype> targ
 	weight -= differential;
 	return (error_plus_h - error) / differential;
 }
+nntype neural_net::partial_derivative (vector<nntype> x, vector<nntype> target, int weight_m, int r, int c){
+	//only works with 1 hidden layer
+	vector<nntype> output = activation(x);
+	nntype to_return = 0;
+	if (weight_m == 1){
+		//cout << "reached second weight matrix" << endl;
+		to_return = between_layers[c];
+		to_return = 2 * (output[r] - target[r]) * to_return;
+	}
+	else {
+		for(int i = 0; i < 10; i++){
+			to_return += weights[0].m[i][r] * (output[i] - target[i]);
+		}
+		nntype ReLU_deriv = 0;
+		if(between_layers[r] > 0) ReLU_deriv = 1;
+		to_return = ReLU_deriv * x[c] * to_return;
+	}
+	return to_return;
+}
+
 void neural_net::learn(vector<nntype> x, vector<nntype> target){
 	//updates corrections for one training image
+	int counter = 0, total = 0;
 	for(int i = 0; i < weights.size(); i++){
 		for(int j = 0; j < weights[i].rows; j++){
 			for(int k = 0; k < weights[i].columns; k++){
-				nntype partial = partial_derivative_num(x, target, weights[i].m[j][k]);
+				nntype partial_num = partial_derivative_num(x, target, weights[i].m[j][k]);
+				nntype partial = partial_derivative(x, target, i, j, k);
+				if (abs(partial - partial_num) < 1) counter += 1;
 				corrections[i].set_element(j, k, corrections[i].e(j, k) - (step_size * partial));
+				total += 1;
 			}
 		}
 	}
+	cout << "counter " << counter << endl;
+	cout << "total " << total << endl; 
 }
 int neural_net::vectordigit (vector<nntype> output){
 	nntype max = *max_element(output.begin(), output.end());
@@ -83,10 +110,7 @@ int neural_net::vectordigit (vector<nntype> output){
 vector<nntype> neural_net::digitvector (nntype digit){
 	vector<nntype> v;
 	for (int i = 0; i < 10; i++) {
-		if (i == digit)
-			v.push_back(1);
-		else
-			v.push_back(0);
+		v.push_back(i == digit);
 	}
 	return v;
 }
@@ -103,6 +127,7 @@ void neural_net::train (vector<train_img> batch){
 		if (identify(batch[i].pixels) == batch[i].label)
 			correct += 1;
 		learn(batch[i].pixels, target);
+		cout << "one img processsed" << endl;
 	}
 	cout << "Percent Correct: " << (100 * (correct / batch.size())) << endl;
 	for (int i = 0; i < corrections.size(); i++)

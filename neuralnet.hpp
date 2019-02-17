@@ -33,6 +33,7 @@ class train_img {
 class neural_net {
 	public:
 		vector<int> shape;
+		vector<nntype> between_layers;
 		int inputs;
 		vector<matrix> weights;
 		vector<matrix> corrections;
@@ -44,6 +45,7 @@ class neural_net {
 		nntype error_datum (vector<nntype>, vector<nntype>);
 		nntype error_data (vector< vector<nntype> >, vector< vector<nntype> >);
 		nntype partial_derivative_num (vector<nntype>, vector<nntype>, nntype &);
+		nntype partial_derivative (vector<nntype>, vector<nntype>, int, int, int); 
 		void learn (vector<nntype>, vector<nntype>);
 		int vectordigit (vector<nntype>);
 		vector<nntype> digitvector (nntype digit);
@@ -51,4 +53,4 @@ class neural_net {
 		void train (vector<train_img>);
 		nntype test (vector<train_img>);
 };
-vector<train_img> read_mnist(string);
+vector<train_img> read_mnist(string, int);

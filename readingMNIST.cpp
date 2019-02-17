@@ -11,9 +11,10 @@ train_img::train_img(int l, vector<nntype> p){
 	label = l;
 	pixels = p;
 }
-vector<train_img> read_mnist (string filename){
+vector<train_img> read_mnist (string filename, int size){
 	ifstream myfile (filename);
 	int label;
+	int count = 0;
 	string line, sval;
 	vector<train_img> img_list;
 	vector<nntype> pixels;
@@ -22,6 +23,8 @@ vector<train_img> read_mnist (string filename){
 	cout << "pixels initiated" << endl;
 	while (getline (myfile, line)){
 		int v_count = 0;
+		count += 1;
+		if (count >= size) break;
 		stringstream ss (line);
 		while (ss.good ()){
 			getline (ss, sval, ',');
@@ -36,5 +39,6 @@ vector<train_img> read_mnist (string filename){
 		img_list.push_back(img);
 	}
 	myfile.close();
+	cout << "file read finished" << endl;
 	return img_list;
 }
