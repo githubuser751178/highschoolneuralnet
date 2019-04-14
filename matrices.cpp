@@ -21,6 +21,14 @@ nntype matrix::e(int i, int j){
 void matrix::set_element (int r, int c, nntype e){
 	m[r][c] = e;
 }
+void matrix::print(){
+	for(int i = 0; i < rows; i++){
+		for(int j = 0; j < columns; j++){
+			cout << m[i][j] << " ";
+		}
+		cout << "\n";
+	}
+}
 void matrix::randomize (){
 	for(int i=0; i<rows; i++){
 		for(int j = 0; j < columns; j++){
