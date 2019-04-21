@@ -111,7 +111,7 @@ void neural_net::learn(vector<nntype> x, vector<nntype> target){
 	for(int i = 0; i < weights.size(); i++){
 		for(int j = 0; j < weights[i].rows; j++){
 			for(int k = 0; k < weights[i].columns; k++){
-				nntype partial_num = partial_derivative_num(x, target, weights[i].m[j][k]);
+				//nntype partial_num = partial_derivative_num(x, target, weights[i].m[j][k]);
 				nntype partial = partial_derivative(x, target, i, j, k);
 				/*
 				cout << "layer: " << i << endl;
@@ -126,33 +126,45 @@ void neural_net::learn(vector<nntype> x, vector<nntype> target){
 	}
 }
 //if index 1 is bigger, return true
-int neural_net::vectordigit (vector<nntype> output){
-	if(output[1] > output[0])
-		return 1;
-	return 0;
+int neural_net::get_digit(vector<nntype> output){
+	int counter = 0;
+	for(int i = 1; i < 10; i++){
+		if(output[i] > output[counter]){
+			counter = i;
+		}
+	}
+	return counter;
+}
+
+vector<nntype> neural_net::get_vector(int digit){
+	vector<nntype> v;
+	for(int i = 0; i < 10; i++)
+		v.push_back(0);
+	v[digit] = 1;
+	return v;
 }
 
 int neural_net::identify (vector<nntype> pixels){
-	return vectordigit(activation(pixels));
+	return get_digit(activation(pixels));
 }
-void neural_net::train (vector<xor_input> batch){
+void neural_net::train (vector<train_img> batch){
 	nntype correct = 0;
 	for (int i = 0; i < corrections.size(); i++)
 		corrections[i].zero();
 	for (int i = 0; i < batch.size(); i++){
-		if (identify(batch[i].things) == batch[i].label)
+		if (identify(batch[i].pixels) == batch[i].label)
 			correct += 1;
-		learn(batch[i].things, batch[i].target);
+		learn(batch[i].pixels, get_vector(batch[i].label));
 	}
 	cout << "training percent correct: " << (100 * (correct / batch.size())) << endl;
 	for (int i = 0; i < corrections.size(); i++)
 		weights[i] = weights[i].plus(corrections[i]);
 	activationMemo.map.clear();
 }
-nntype neural_net::test (vector<xor_input> batch){
+nntype neural_net::test (vector<train_img> batch){
 	nntype correct = 0;
 	for (int i = 0; i < batch.size(); i++){
-		if (identify(batch[i].things) == batch[i].label)
+		if (identify(batch[i].pixels) == batch[i].label)
 			correct += 1;
 	}
 	return (100 * (correct / batch.size()));

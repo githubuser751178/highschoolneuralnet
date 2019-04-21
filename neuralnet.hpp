@@ -64,10 +64,11 @@ class neural_net {
 		nntype partial_derivative_num (vector<nntype>, vector<nntype>, nntype &);
 		nntype partial_derivative (vector<nntype>, vector<nntype>, int, int, int); 
 		void learn (vector<nntype>, vector<nntype>);
-		int vectordigit (vector<nntype>);
+		int get_digit(vector<nntype>);
+		vector<nntype> get_vector(int);
 		int identify (vector<nntype>);
-		void train (vector<xor_input>);
-		nntype test (vector<xor_input>);
+		void train (vector<train_img>);
+		nntype test (vector<train_img>);
 };
 
 vector<train_img> read_mnist(string, int);

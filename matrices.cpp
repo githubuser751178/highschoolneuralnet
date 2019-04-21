@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <random>
+#include <time.h>
 #include "neuralnet.hpp"
 
 using namespace std;
@@ -30,6 +31,7 @@ void matrix::print(){
 	}
 }
 void matrix::randomize (){
+	srand(time(NULL));
 	for(int i=0; i<rows; i++){
 		for(int j = 0; j < columns; j++){
 			nntype x = (((nntype)rand()/(nntype)RAND_MAX)-.5);
