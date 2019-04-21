@@ -50,6 +50,7 @@ class neural_net {
 		vector<int> shape;
 		vector<nntype> between_layers;
 		int inputs;
+		bool weights_changed;
 		vector<matrix> weights;
 		vector<matrix> corrections;
 		nntype step_size;
@@ -72,3 +73,4 @@ class neural_net {
 vector<train_img> read_mnist(string, int);
 vector<xor_input> get_inputs(int);
 nntype dot(vector<nntype>, vector<nntype>);
+nntype percent_error(nntype, nntype);

@@ -31,6 +31,7 @@ neural_net::neural_net(vector<int> s, int i, nntype ss, nntype diff){
 	inputs = i;
 	step_size = ss;
 	differential = diff;
+	weights_changed = false;
 	matrix blankweight1 (inputs, shape[0]);
 	blankweight1.randomize();
 	weights.push_back(blankweight1);
@@ -50,7 +51,7 @@ nntype neural_net::ReLU(nntype x){
 
 vector<nntype> neural_net::activation(vector<nntype> input){
 	vector<nntype> current = input;
-	if(activationMemo.contains(input))
+	if(!weights_changed && activationMemo.contains(input))
 		return activationMemo.at(input);
 	for(int i = 0; i < weights.size(); i++){
 		current = weights[i].timesV(current);
@@ -83,8 +84,10 @@ nntype neural_net::error_data
 nntype neural_net::partial_derivative_num (vector<nntype> x, vector<nntype> target, nntype &weight){
 	nntype error = error_datum(x, target);
 	weight += differential;
+	weights_changed = true;
 	nntype error_plus_h = error_datum(x, target);
 	weight -= differential;
+	weights_changed = false;
 	return (error_plus_h - error) / differential;
 }
 nntype neural_net::partial_derivative (vector<nntype> x, vector<nntype> target, int weight_m, int r, int c){
@@ -97,7 +100,7 @@ nntype neural_net::partial_derivative (vector<nntype> x, vector<nntype> target, 
 			return 0;
 		nntype summation = 0;
 		for(int n = 0; n < target.size(); n++)
-			summation += weights[1].m[n][r];
+			summation += (output[n] - target[n]) * weights[1].m[n][r];
 		return summation * x[c];
 	}
 }
@@ -110,11 +113,14 @@ void neural_net::learn(vector<nntype> x, vector<nntype> target){
 			for(int k = 0; k < weights[i].columns; k++){
 				nntype partial_num = partial_derivative_num(x, target, weights[i].m[j][k]);
 				nntype partial = partial_derivative(x, target, i, j, k);
-				//if (abs(partial - partial_num) < 1) 
-				//	counter += 1;
-//				cout << partial << endl;
+				/*
+				cout << "layer: " << i << endl;
+				cout << "partial num: " << partial_num << endl;
+				cout << "partial sym: " << partial << endl;
+				cout << "percent err: " << percent_error(partial, partial_num) << endl;
+				cout << " ----------- " << endl;
+				*/
 				corrections[i].set_element(j, k, corrections[i].e(j, k) - (step_size * partial));
-				//total += 1;
 			}
 		}
 	}
