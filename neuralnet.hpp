@@ -5,6 +5,7 @@
 using namespace std;
 
 typedef double nntype;
+typedef vector<nntype> nntype_vector;
 
 class matrix {
 	public:
@@ -45,6 +46,16 @@ class nn_map {
 		bool contains(vector<nntype>);
 };
 
+struct vector_hash{
+    int operator()(const nntype_vector &V) const {
+        int hash=0;
+        for(int i=0;i<V.size();i++) {
+            hash+=V[i]; // Can be anything
+        }
+        return hash;
+    }
+};
+
 class neural_net {
 	public:
 		vector<int> shape;
@@ -69,7 +80,10 @@ class neural_net {
 		int identify (vector<nntype>);
 		void train (vector<train_img>);
 		nntype test (vector<train_img>);
+		//unordered_map<nntype_vector, nntype_vector, container_hash<nntype_vector>> map;
+		unordered_map <nntype_vector, nntype_vector, vector_hash> memo;
 };
+
 
 vector<train_img> read_mnist(string, int);
 vector<xor_input> get_inputs(int);

@@ -6,6 +6,7 @@
 using namespace std;
 
 typedef double nntype;
+typedef vector<nntype> nntype_vector;
 
 //nn_map is a memoization table
 void nn_map::insert(vector<nntype> key, vector<nntype> value){
@@ -51,8 +52,8 @@ nntype neural_net::ReLU(nntype x){
 
 vector<nntype> neural_net::activation(vector<nntype> input){
 	vector<nntype> current = input;
-	if(!weights_changed && activationMemo.contains(input))
-		return activationMemo.at(input);
+	if(!weights_changed && memo.find(input) != memo.end())
+		return memo.at(input);
 	for(int i = 0; i < weights.size(); i++){
 		current = weights[i].timesV(current);
 		if (i != weights.size() - 1){
@@ -62,7 +63,8 @@ vector<nntype> neural_net::activation(vector<nntype> input){
 		}
 		if (i == 0) between_layers = current;
 	}
-	activationMemo.insert(input, current);
+	//activationMemo.insert(input, current);
+	memo.emplace(input, current);
 	return current;
 }
 nntype neural_net::error_datum(vector<nntype> input, vector<nntype> target){
@@ -90,7 +92,8 @@ nntype neural_net::partial_derivative_num (vector<nntype> x, vector<nntype> targ
 	weights_changed = false;
 	return (error_plus_h - error) / differential;
 }
-nntype neural_net::partial_derivative (vector<nntype> x, vector<nntype> target, int weight_m, int r, int c){
+nntype neural_net::partial_derivative
+(vector<nntype> x, vector<nntype> target, int weight_m, int r, int c){
 	vector<nntype> output = activation(x);
 	if (weight_m == 1){
 		return (output[r] - target[r]) * between_layers[c];
@@ -114,12 +117,12 @@ void neural_net::learn(vector<nntype> x, vector<nntype> target){
 				//nntype partial_num = partial_derivative_num(x, target, weights[i].m[j][k]);
 				nntype partial = partial_derivative(x, target, i, j, k);
 				/*
-				cout << "layer: " << i << endl;
-				cout << "partial num: " << partial_num << endl;
-				cout << "partial sym: " << partial << endl;
-				cout << "percent err: " << percent_error(partial, partial_num) << endl;
-				cout << " ----------- " << endl;
-				*/
+				   cout << "layer: " << i << endl;
+				   cout << "partial num: " << partial_num << endl;
+				   cout << "partial sym: " << partial << endl;
+				   cout << "percent err: " << percent_error(partial, partial_num) << endl;
+				   cout << " ----------- " << endl;
+				 */
 				corrections[i].set_element(j, k, corrections[i].e(j, k) - (step_size * partial));
 			}
 		}
