@@ -18,7 +18,7 @@ nntype time_estimate(nntype inputs){
 	return .003503 * pow(inputs, 2) + .19 * inputs + .0706;
 }
 bool partials_match(){
-	//randomly generates data set for 
+	//randomly generates data set for
 	int DIM1 = 3, DIM2 = 2, NUM_CHECKS = 10;
 	srand(time(NULL));
 	vector<int> shapes = {DIM1, DIM2};
@@ -26,7 +26,7 @@ bool partials_match(){
 	for(int i = 0; i < NUM_CHECKS; i++){
 		vector<nntype> dummy_input, dummy_target;
 		for(int j = 0; j < DIM1; j++)
-			dummy_input.push_back(rand() % 2);	
+			dummy_input.push_back(rand() % 2);
 		for(int j = 0; j < DIM2; j++)
 			dummy_target.push_back(rand() % 2);
 		nntype partial_num = partial_check.partial_derivative_num
@@ -42,11 +42,11 @@ bool partials_match(){
 int main () {
 	//change test set to random
 	vector<train_img> training_set, test_set;
-	cout << "partials match? " << partials_match() << endl;
-	training_set = read_mnist("mnist_train.csv", 10);
+	// cout << "partials match? " << partials_match() << endl;
+	training_set = read_mnist("mnist_train.csv", 100);
 	cout << "n^2 time estimate: " << time_estimate(60000) << endl;
 	cout << "train set len: " << training_set.size() << endl;
-	test_set = read_mnist("mnist_test.csv", 10);
+	test_set = read_mnist("mnist_test.csv", 100);
 	vector<int> shapes = {392, 10};
 	neural_net please_work(shapes, 784, .1, .01);
 	//cout << "weight matrices" << endl;
@@ -54,9 +54,11 @@ int main () {
 	//myXOR.weights[1].print();
 	cout << "test percent correct before training: " << please_work.test(test_set) << endl;
 	chrono::steady_clock::time_point begin = chrono::steady_clock::now();
-	please_work.train(training_set);
+	int epochs = 1;
+	for (int epoch=0; epoch<epochs; epoch++)
+		please_work.train(training_set);
 	chrono::steady_clock::time_point end = chrono::steady_clock::now();
-	cout << "Time difference (seconds): " 
+	cout << "Time difference (seconds): "
 		<< chrono::duration_cast<chrono::microseconds>
 		(end - begin).count() / 1000000.0 << endl;
 	cout << "test percent correct after training: " << please_work.test(test_set) << endl;

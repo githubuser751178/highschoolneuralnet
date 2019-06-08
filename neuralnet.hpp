@@ -74,8 +74,8 @@ class neural_net {
 		nntype error_datum (vector<nntype>, vector<nntype>);
 		nntype error_data (vector< vector<nntype> >, vector< vector<nntype> >);
 		nntype partial_derivative_num (vector<nntype>, vector<nntype>, nntype &);
-		nntype partial_derivative (vector<nntype>, vector<nntype>, vector<nntype>, int, int, int); 
-		void learn (vector<nntype>, vector<nntype>, vector<nntype>);
+		nntype partial_derivative (const vector<nntype>&, const vector<nntype>&, const vector<nntype>&, int, int, int);
+		void learn (const vector<nntype>&, const vector<nntype>&, const vector<nntype>&);
 		int get_digit(vector<nntype>);
 		vector<nntype> get_vector(int);
 		int identify (vector<nntype>);

@@ -46,8 +46,8 @@ neural_net::neural_net(vector<int> s, int i, nntype ss, nntype diff){
 	}
 }
 nntype neural_net::ReLU(nntype x){
-	if(x >= 0) 
-		return x; 
+	if(x >= 0)
+		return x;
 	return 0;
 }
 
@@ -95,8 +95,9 @@ nntype neural_net::partial_derivative_num (vector<nntype> input, vector<nntype> 
 	weights_changed = false;
 	return (error_plus_h - error) / differential;
 }
+
 nntype neural_net::partial_derivative
-(vector<nntype> input, vector<nntype> output, vector<nntype> target, int weight_m, int r, int c){
+(const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target, int weight_m, int r, int c){
 	if (weight_m == 1){
 		return (output[r] - target[r]) * between_layers[c];
 	}
@@ -110,7 +111,7 @@ nntype neural_net::partial_derivative
 	}
 }
 
-void neural_net::learn(vector<nntype> input, vector<nntype> output, vector<nntype> target){
+void neural_net::learn(const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target){
 	//updates corrections for one training image
 	int counter = 0, total = 0;
 	for(int i = 0; i < weights.size(); i++){
@@ -157,15 +158,18 @@ void neural_net::train (vector<train_img> batch){
 	for (int i = 0; i < corrections.size(); i++)
 		corrections[i].zero();
 	for (int i = 0; i < batch.size(); i++){
+		cout << "batch i " << i << endl;
 		vector<nntype> output = activation(batch[i].pixels);
 		if (get_digit(output) == batch[i].label)
 			correct += 1;
 		learn(batch[i].pixels, output, get_vector(batch[i].label));
 	}
 	cout << "training percent correct: " << (100 * (correct / batch.size())) << endl;
-	for (int i = 0; i < corrections.size(); i++)
+	assert (corrections.sum() != 0);
+	for (int i = 0; i < corrections.size(); i++) {
 		weights[i] = weights[i].plus(corrections[i]);
 	//memo.clear();
+	}
 }
 nntype neural_net::test (vector<train_img> batch){
 	nntype correct = 0;
