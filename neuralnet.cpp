@@ -4,7 +4,7 @@
 #include "neuralnet.hpp"
 #include <assert.h>
 using namespace std;
-
+// foo
 typedef double nntype;
 typedef vector<nntype> nntype_vector;
 
