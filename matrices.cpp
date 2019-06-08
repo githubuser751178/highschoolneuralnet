@@ -30,6 +30,15 @@ void matrix::print(){
 		cout << "\n";
 	}
 }
+nntype matrix::sum_elements(){
+	nntype ans = 0;
+	for(int i = 0; i < rows; i++){
+		for(int j = 0; j < columns; j++){
+			ans += m[i][j];
+		}
+	}
+	return ans;
+}
 void matrix::randomize (){
 	srand(time(NULL));
 	for(int i=0; i<rows; i++){
