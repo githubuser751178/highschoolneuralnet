@@ -95,8 +95,9 @@ nntype neural_net::partial_derivative_num (vector<nntype> input, vector<nntype> 
 	weights_changed = false;
 	return (error_plus_h - error) / differential;
 }
+
 nntype neural_net::partial_derivative
-(vector<nntype> input, vector<nntype> output, vector<nntype> target, int weight_m, int r, int c){
+(const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target, int weight_m, int r, int c){
 	if (weight_m == 1){
 		return (output[r] - target[r]) * between_layers[c];
 	}
@@ -110,7 +111,7 @@ nntype neural_net::partial_derivative
 	}
 }
 
-void neural_net::learn(vector<nntype> input, vector<nntype> output, vector<nntype> target){
+void neural_net::learn(const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target){
 	//updates corrections for one training image
 	int counter = 0, total = 0;
 	for(int i = 0; i < weights.size(); i++){
