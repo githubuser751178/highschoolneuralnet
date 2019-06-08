@@ -2,6 +2,7 @@
 #include <vector>
 #include <random>
 #include "neuralnet.hpp"
+#include <assert.h>
 using namespace std;
 
 typedef double nntype;
@@ -165,8 +166,8 @@ void neural_net::train (vector<train_img> batch){
 		learn(batch[i].pixels, output, get_vector(batch[i].label));
 	}
 	cout << "training percent correct: " << (100 * (correct / batch.size())) << endl;
-	assert (corrections.sum() != 0);
 	for (int i = 0; i < corrections.size(); i++) {
+		assert (corrections[i].sum_elements() != 0);
 		weights[i] = weights[i].plus(corrections[i]);
 	//memo.clear();
 	}

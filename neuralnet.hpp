@@ -11,6 +11,7 @@ class matrix {
 		int rows, columns;
 		vector< vector<nntype> > m;
 		matrix (int,int);
+		nntype sum_elements();
 		void set_element (int,int,nntype);
 		void randomize ();
 		void zero ();
