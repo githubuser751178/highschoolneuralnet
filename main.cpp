@@ -34,7 +34,7 @@ bool partials_match(){
 	for(int i = 0; i < NUM_CHECKS; i++){
 		vector<nntype> dummy_input, dummy_target;
 		for(int j = 0; j < DIM1; j++)
-			dummy_input.push_back(rand() % 2);	
+			dummy_input.push_back(rand() % 2);
 		for(int j = 0; j < DIM2; j++)
 			dummy_target.push_back(rand() % 2);
 		nntype partial_num = partial_check.partial_derivative_num

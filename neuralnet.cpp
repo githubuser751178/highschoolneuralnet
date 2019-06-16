@@ -2,8 +2,9 @@
 #include <vector>
 #include <random>
 #include "neuralnet.hpp"
+#include <assert.h>
 using namespace std;
-
+// foo
 typedef double nntype;
 typedef vector<nntype> nntype_vector;
 
@@ -46,8 +47,8 @@ neural_net::neural_net(vector<int> s, int i, nntype ss, nntype diff){
 	}
 }
 nntype neural_net::ReLU(nntype x){
-	if(x >= 0) 
-		return x; 
+	if(x >= 0)
+		return x;
 	return 0;
 }
 
@@ -160,15 +161,18 @@ void neural_net::train (vector<train_img> batch){
 	for (int i = 0; i < corrections.size(); i++)
 		corrections[i].zero();
 	for (int i = 0; i < batch.size(); i++){
+		cout << "batch i " << i << endl;
 		vector<nntype> output = activation(batch[i].pixels);
 		if (get_digit(output) == batch[i].label)
 			correct += 1;
 		learn(batch[i].pixels, output, get_vector(batch[i].label));
 	}
 	cout << "training percent correct: " << (100 * (correct / batch.size())) << endl;
-	for (int i = 0; i < corrections.size(); i++)
+	for (int i = 0; i < corrections.size(); i++) {
+		assert (corrections[i].sum_elements() != 0);
 		weights[i] = weights[i].plus(corrections[i]);
 	//memo.clear();
+	}
 }
 nntype neural_net::test (vector<train_img> batch){
 	nntype correct = 0;
