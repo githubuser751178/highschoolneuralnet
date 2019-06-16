@@ -38,6 +38,13 @@ class xor_input {
 		xor_input(nntype, nntype);
 };
 
+class randp {
+	public:
+		randp(int);
+		vector<int> nums;
+		int nums_left;
+		int next_int();
+};
 /*
 class nn_map {
 	public:

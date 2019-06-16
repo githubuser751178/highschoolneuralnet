@@ -11,6 +11,7 @@ train_img::train_img(int l, vector<nntype> p){
 	label = l;
 	pixels = p;
 }
+
 vector<train_img> read_mnist (string filename, int size){
 	ifstream myfile (filename);
 	int label;
@@ -31,8 +32,8 @@ vector<train_img> read_mnist (string filename, int size){
 			int val = stoi(sval);
 			if (v_count == 0)
 				label = val;
-			else
-				pixels[v_count - 1] = val;
+			else if(val > 0)
+				pixels[v_count - 1] = 1;
 			v_count += 1;
 		}
 		train_img img = train_img(label, pixels);

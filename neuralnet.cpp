@@ -34,12 +34,12 @@ neural_net::neural_net(vector<int> s, int i, nntype ss, nntype diff){
 	step_size = ss;
 	differential = diff;
 	weights_changed = false;
-	matrix blankweight1 (inputs, shape[0]);
+	matrix blankweight1 (shape[0], inputs);
 	blankweight1.randomize();
 	weights.push_back(blankweight1);
 	corrections.push_back(blankweight1);
 	for(int i = 1; i < shape.size(); i++){
-		matrix blankweight (shape[i - 1], shape[i]);
+		matrix blankweight (shape[i], shape[i - 1]);
 		blankweight.randomize();
 		weights.push_back(blankweight);
 		corrections.push_back(blankweight);
@@ -102,6 +102,7 @@ nntype neural_net::partial_derivative
 		return (output[r] - target[r]) * between_layers[c];
 	}
 	else {
+		//cout << "weights[0].m[r].size(), input.size(): " << weights[0].m[r].size() << " " << input.size() << endl;
 		if (dot(weights[0].m[r], input) <= 0)
 			return 0;
 		nntype summation = 0;
@@ -119,13 +120,14 @@ void neural_net::learn(const vector<nntype>& input, const vector<nntype>& output
 			for(int k = 0; k < weights[i].columns; k++){
 				//nntype partial_num = partial_derivative_num(x, target, weights[i].m[j][k]);
 				nntype partial = partial_derivative(input, output, target, i, j, k);
+				//cout << "partial: " << partial << endl;
 				/*
 				   cout << "layer: " << i << endl;
 				   cout << "partial num: " << partial_num << endl;
 				   cout << "partial sym: " << partial << endl;
 				   cout << "percent err: " << percent_error(partial, partial_num) << endl;
 				   cout << " ----------- " << endl;
-				 */
+				*/
 				corrections[i].set_element(j, k, corrections[i].e(j, k) - (step_size * partial));
 			}
 		}

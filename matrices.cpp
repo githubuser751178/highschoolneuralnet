@@ -2,6 +2,7 @@
 #include <vector>
 #include <random>
 #include <time.h>
+#include <assert.h>
 #include "neuralnet.hpp"
 
 using namespace std;
@@ -57,14 +58,15 @@ void matrix::zero (){
 }
 
 nntype dot(vector<nntype> v1, vector<nntype> v2){
+	assert(v1.size() == v2.size());
+	/*
+	if(v1.size() != v2.size())
+		cout << "dot sizes don't match dumbass" << endl;
+	*/
 	nntype sum = 0;
-	if(v1.size() == v2.size()){
-		for(int i=0; i<v1.size(); i++)
-			sum += v1[i]*v2[i];
-		return sum;
-	} else{
-		return 0;
-	}
+	for(int i=0; i<v1.size(); i++)
+		sum += v1[i]*v2[i];
+	return sum;
 }
 vector<nntype> matrix::timesV(vector<nntype> v){
 	vector<nntype> product;
