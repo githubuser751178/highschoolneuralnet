@@ -7,18 +7,25 @@
 #include <cmath>
 #include <time.h>
 #include <chrono>
-
+#define p(x) cout << #x << ": " << x << endl
 using namespace std;
 
 typedef double nntype;
 
+//NEURAL NET CONFIG
 bool CHECK_PARTIALS = true;
-int TRAIN_SET_LEN = 50000, TEST_SET_LEN = 9000;
-int TRAIN_SIZE = 100, TEST_SIZE = 100;
+int TRAIN_FILE_SIZE = 50000, TEST_FILE_SIZE = 9000;
+int TRAIN_SIZE = 5, TEST_SIZE = 100, TRAIN_ROUNDS = 5;
 vector<int> NN_SHAPE = {392, 10};
-nntype STEP_SIZE = .1, APPROX_H = .01;
+nntype STEP_SIZE = .001, APPROX_H = .01;
 
 nntype percent_error(nntype approx, nntype exact){
+	if(exact == 0){
+		if(approx == 0){
+			return 0;
+		}
+		return 1234;
+	}
 	return abs(approx - exact) / exact;
 }
 nntype time_estimate(nntype inputs){
@@ -41,47 +48,66 @@ bool partials_match(){
 			(dummy_input, dummy_target, partial_check.weights[0].m[0][0]);
 		nntype partial_sym = partial_check.partial_derivative
 			(dummy_input, partial_check.activation(dummy_input), dummy_target, 0, 0, 0);
-		if(percent_error(partial_sym, partial_num) > .01)
+		if(percent_error(partial_sym, partial_num) > .01){
+			cout << "partial_sym: " << partial_sym << endl;
+			cout << "partial_num: " << partial_num << endl;
+			cout << "% error: " << percent_error(partial_sym, partial_num) << endl; 
 			return false;
+		}
 	}
 	return true;
 }
+vector<train_img> get_batch(int size, vector<train_img>& total_set){
+	vector<train_img> batch;
+	randp rng(size);
+	for(int i = 0; i < size; i++){
+		batch.push_back(total_set[rng.next_int()]);
+	}
+	return batch;
+}
 
 int main () {
-	//next task: randomize which images to test on
+
+	neural_net solve_mnist(NN_SHAPE, 784, STEP_SIZE, APPROX_H);
 	if(CHECK_PARTIALS)
-		assert(partials_match());
+		cout << "partials match: " << partials_match() << endl;
 
 	vector<train_img> training_set, test_set, entire_train, entire_test;
-	
+	training_set = random_read("mnist_train.csv", TRAIN_FILE_SIZE, TRAIN_SIZE);
+	test_set = random_read("mnist_test.csv", TEST_FILE_SIZE, TEST_SIZE);
+
+	/*
 	entire_train = read_mnist("mnist_train.csv", 50000);
 	entire_test = read_mnist("mnist_test.csv", 9000);
-	neural_net solve_mnist(NN_SHAPE, 784, STEP_SIZE, APPROX_H);
-	
 	randp train_rand(50000), test_rand(9000);
 	for(int i = 0; i < TRAIN_SIZE; i++)
 		training_set.push_back(entire_train[train_rand.next_int()]);	
 	for(int i = 0; i < TEST_SIZE; i++)
 		test_set.push_back(entire_test[test_rand.next_int()]);
+	*/
 
-	cout << "train set len: " << training_set.size() << endl;
+
+	cout << "train set length: " << training_set.size() << endl;
 	cout << "test percent correct before training: " << solve_mnist.test(test_set) << endl;
 
 	chrono::steady_clock::time_point begin = chrono::steady_clock::now();
-	solve_mnist.train(training_set);
+
+	for(int i = 0; i < TRAIN_ROUNDS; i++){
+		//training_set = get_batch(TRAIN_SIZE, entire_train);
+		solve_mnist.train(training_set);
+	}
 	chrono::steady_clock::time_point end = chrono::steady_clock::now();
 
 	cout << "Time difference (seconds): " 
 		<< chrono::duration_cast<chrono::microseconds>
 		(end - begin).count() / 1000000.0 << endl;
-
 	cout << "test percent correct after training: " << solve_mnist.test(test_set) << endl;
-	
+
 	/*
-	randp tester(5);
-	for(int i = 0; i < 7; i++){
-		cout << tester.next_int() << endl;
-	}
-	*/
+	   randp tester(5);
+	   for(int i = 0; i < 7; i++){
+	   cout << tester.next_int() << endl;
+	   }
+	   */
 	return 0;
 }

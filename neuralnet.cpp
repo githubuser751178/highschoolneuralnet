@@ -104,6 +104,7 @@ nntype neural_net::partial_derivative
 	}
 	else {
 		//cout << "weights[0].m[r].size(), input.size(): " << weights[0].m[r].size() << " " << input.size() << endl;
+		//this is redundant, this dot prod is evaluated for all r and c, needs to be eval for all r
 		if (dot(weights[0].m[r], input) <= 0)
 			return 0;
 		nntype summation = 0;
@@ -161,11 +162,12 @@ void neural_net::train (vector<train_img> batch){
 	for (int i = 0; i < corrections.size(); i++)
 		corrections[i].zero();
 	for (int i = 0; i < batch.size(); i++){
-		cout << "batch i " << i << endl;
+		//cout << "batch i " << i << endl;
 		vector<nntype> output = activation(batch[i].pixels);
 		if (get_digit(output) == batch[i].label)
 			correct += 1;
 		learn(batch[i].pixels, output, get_vector(batch[i].label));
+		cout << "learned on image #" << i << endl;
 	}
 	cout << "training percent correct: " << (100 * (correct / batch.size())) << endl;
 	for (int i = 0; i < corrections.size(); i++) {
@@ -173,6 +175,10 @@ void neural_net::train (vector<train_img> batch){
 		weights[i] = weights[i].plus(corrections[i]);
 	//memo.clear();
 	}
+	cout << "corrections[1]: " << endl;
+	corrections[1].print(1,10);
+	cout << "weights[1]: " << endl;
+	weights[1].print(1,10);
 }
 nntype neural_net::test (vector<train_img> batch){
 	nntype correct = 0;

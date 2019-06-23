@@ -31,6 +31,14 @@ void matrix::print(){
 		cout << "\n";
 	}
 }
+void matrix::print(int r, int c){
+	for(int i = 0; i < r; i++){
+		for(int j = 0; j < c; j++){
+			cout << m[i][j] << " ";
+		}
+		cout << "\n";
+	}
+}
 nntype matrix::sum_elements(){
 	nntype ans = 0;
 	for(int i = 0; i < rows; i++){

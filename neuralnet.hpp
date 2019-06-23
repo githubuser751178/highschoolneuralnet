@@ -6,6 +6,7 @@ using namespace std;
 typedef double nntype;
 typedef vector<nntype> nntype_vector;
 
+	
 class matrix {
 	public:
 		int rows, columns;
@@ -16,6 +17,7 @@ class matrix {
 		void randomize ();
 		void zero ();
 		void print ();
+		void print(int, int);
 		vector<nntype> timesV(vector<nntype>);
 		vector<nntype> get_column(int);
 		nntype e(int,int);
@@ -30,14 +32,6 @@ class train_img {
 		train_img (int, vector<nntype>);
 };
 
-class xor_input {
-	public:
-		int label;
-		vector<nntype> target;
-		vector<nntype> things;
-		xor_input(nntype, nntype);
-};
-
 class randp {
 	public:
 		randp(int);
@@ -45,25 +39,6 @@ class randp {
 		int nums_left;
 		int next_int();
 };
-/*
-class nn_map {
-	public:
-		vector<pair<vector<nntype>, vector<nntype> > > map;
-		void insert(vector<nntype>, vector<nntype>);
-		vector<nntype> at(vector<nntype>);
-		bool contains(vector<nntype>);
-};
-
-struct vector_hash{
-    int operator()(const nntype_vector &V) const {
-        int hash=0;
-        for(int i=0;i<V.size();i++) {
-            hash+=V[i]; // Can be anything
-        }
-        return hash;
-    }
-};
-*/
 
 class neural_net {
 	public:
@@ -93,8 +68,36 @@ class neural_net {
 		//unordered_map <nntype_vector, nntype_vector, vector_hash> memo;
 };
 
-
-vector<train_img> read_mnist(string, int);
-vector<xor_input> get_inputs(int);
 nntype dot(vector<nntype>, vector<nntype>);
+vector<train_img> read_mnist(string, int);
+vector<train_img> random_read(string, int, int);
 nntype percent_error(nntype, nntype);
+//vector<xor_input> get_inputs(int);
+
+/*
+class nn_map {
+	public:
+		vector<pair<vector<nntype>, vector<nntype> > > map;
+		void insert(vector<nntype>, vector<nntype>);
+		vector<nntype> at(vector<nntype>);
+		bool contains(vector<nntype>);
+};
+
+struct vector_hash{
+    int operator()(const nntype_vector &V) const {
+        int hash=0;
+        for(int i=0;i<V.size();i++) {
+            hash+=V[i]; // Can be anything
+        }
+        return hash;
+    }
+};
+
+class xor_input {
+	public:
+		int label;
+		vector<nntype> target;
+		vector<nntype> things;
+		xor_input(nntype, nntype);
+};
+*/
