@@ -3,10 +3,14 @@
 #include <random>
 #include "neuralnet.hpp"
 #include <assert.h>
+#include <math.h>
+
 using namespace std;
 // foo
 typedef double nntype;
 typedef vector<nntype> nntype_vector;
+
+#define p(x) cout << #x << ": " << x << endl
 
 /*
 //nn_map is a memoization table
@@ -29,48 +33,35 @@ bool nn_map::contains(vector<nntype> key){
 }
 */
 
-neural_net::neural_net(vector<int> s, int i, nntype ss, nntype diff){
-	shape = s;
+neural_net::neural_net(int i, nntype ss, nntype diff){
 	inputs = i;
 	step_size = ss;
 	differential = diff;
 	weights_changed = false;
-	matrix blankweight1 (shape[0], inputs);
-	blankweight1.randomize();
-	weights.push_back(blankweight1);
-	corrections.push_back(blankweight1);
-	for(int i = 1; i < shape.size(); i++){
-		matrix blankweight (shape[i], shape[i - 1]);
-		blankweight.randomize();
-		weights.push_back(blankweight);
-		corrections.push_back(blankweight);
-	}
+	weight_cap = 5;
+	matrix blankweight(10, 784);
+	blankweight.randomize();
+	weights.push_back(blankweight);
+	corrections.push_back(blankweight);
 }
-nntype neural_net::ReLU(nntype x){
-	if(x >= 0)
-		return x;
-	return 0;
+
+nntype neural_net::logistic(nntype x){
+	return 1.0 / (1.0 + exp( -x));
+}
+
+nntype neural_net::dlogistic(nntype x){
+	return exp(-x) / pow(1 + exp(-x), 2);
 }
 
 vector<nntype> neural_net::activation(vector<nntype> input){
-	vector<nntype> current = input;
-	/*
-	if(!weights_changed && memo.find(input) != memo.end())
-		return memo.at(input);
-	*/
-	for(int i = 0; i < weights.size(); i++){
-		current = weights[i].timesV(current);
-		if (i != weights.size() - 1){
-			for(int j = 0; j < current.size(); j++){
-				current[j] = ReLU(current[j]);
-			}
-		}
-		if (i == 0) between_layers = current;
+	input = weights[0].timesV(input);
+	full_connect_output = input;
+	for(int i = 0; i < input.size(); i++){
+		input[i] = logistic(input[i]);
 	}
-	//activationMemo.insert(input, current);
-	//memo.emplace(input, current);
-	return current;
+	return input;
 }
+
 nntype neural_net::error_datum(vector<nntype> input, vector<nntype> target){
 	nntype error = 0;
 	vector<nntype> output = activation(input);
@@ -97,21 +88,21 @@ nntype neural_net::partial_derivative_num (vector<nntype> input, vector<nntype> 
 	return (error_plus_h - error) / differential;
 }
 
+void print_v(vector<nntype> v){
+	for(nntype x : v){
+		cout << x << " ";
+	} cout << endl;
+}
+
+
 nntype neural_net::partial_derivative
 (const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target, int weight_m, int r, int c){
-	if (weight_m == 1){
-		return (output[r] - target[r]) * between_layers[c];
-	}
-	else {
-		//cout << "weights[0].m[r].size(), input.size(): " << weights[0].m[r].size() << " " << input.size() << endl;
-		//this is redundant, this dot prod is evaluated for all r and c, needs to be eval for all r
-		if (dot(weights[0].m[r], input) <= 0)
-			return 0;
-		nntype summation = 0;
-		for(int n = 0; n < target.size(); n++)
-			summation += (output[n] - target[n]) * weights[1].m[n][r];
-		return summation * input[c];
-	}
+	cout << "output" << endl;
+	print_v(output); 
+	cout << "target" << endl;
+	print_v(target);
+	p(dlogistic(full_connect_output[r]));
+	return (output[r] - target[r]) * dlogistic(full_connect_output[r]) * input[c];
 }
 
 void neural_net::learn(const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target){
@@ -122,7 +113,7 @@ void neural_net::learn(const vector<nntype>& input, const vector<nntype>& output
 			for(int k = 0; k < weights[i].columns; k++){
 				//nntype partial_num = partial_derivative_num(x, target, weights[i].m[j][k]);
 				nntype partial = partial_derivative(input, output, target, i, j, k);
-				//cout << "partial: " << partial << endl;
+				cout << "partial: " << partial << endl;
 				/*
 				   cout << "layer: " << i << endl;
 				   cout << "partial num: " << partial_num << endl;
@@ -166,20 +157,32 @@ void neural_net::train (vector<train_img> batch){
 		vector<nntype> output = activation(batch[i].pixels);
 		if (get_digit(output) == batch[i].label)
 			correct += 1;
+		cout << "error: " << error_datum(batch[i].pixels, get_vector(batch[i].label)) << endl;
 		learn(batch[i].pixels, output, get_vector(batch[i].label));
+		cout << "sum elements of corrections: " << corrections[0].sum_elements() << endl;
+		cout << "full connect output: ";
+		for(float j : full_connect_output){
+			cout << j << " ";
+		} cout << endl;
+		cout << "output: ";
+		for(float j : output){
+			cout << j << " ";
+		} cout << endl;
+		p(batch[i].label);
 		cout << "learned on image #" << i << endl;
 	}
 	cout << "training percent correct: " << (100 * (correct / batch.size())) << endl;
 	for (int i = 0; i < corrections.size(); i++) {
-		assert (corrections[i].sum_elements() != 0);
+		//assert (corrections[i].sum_elements() != 0);
 		weights[i] = weights[i].plus(corrections[i]);
 	//memo.clear();
 	}
 	cout << "corrections[1]: " << endl;
-	corrections[1].print(1,10);
+	corrections[0].print(1,10);
 	cout << "weights[1]: " << endl;
-	weights[1].print(1,10);
+	weights[0].print(1,10);
 }
+
 nntype neural_net::test (vector<train_img> batch){
 	nntype correct = 0;
 	for (int i = 0; i < batch.size(); i++){

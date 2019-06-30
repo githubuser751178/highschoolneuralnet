@@ -23,6 +23,7 @@ class matrix {
 		nntype e(int,int);
 		matrix times(matrix);
 		matrix plus(matrix);
+		matrix capped_plus(matrix, nntype);
 		matrix scalar_times(nntype);
 };
 class train_img {
@@ -43,17 +44,19 @@ class randp {
 class neural_net {
 	public:
 		vector<int> shape;
-		vector<nntype> between_layers;
+		vector<nntype> full_connect_output;
 		int inputs;
 		bool weights_changed;
 		vector<matrix> weights;
 		vector<matrix> corrections;
 		nntype step_size;
 		nntype differential;
-		neural_net (vector<int> , int, nntype, nntype);
+		nntype weight_cap;
+		neural_net (int, nntype, nntype);
 		//nn_map activationMemo;
 		vector<nntype> activation(vector<nntype>);
-		nntype ReLU (nntype);
+		nntype logistic (nntype);
+		nntype dlogistic (nntype);
 		nntype error_datum (vector<nntype>, vector<nntype>);
 		nntype error_data (vector< vector<nntype> >, vector< vector<nntype> >);
 		nntype partial_derivative_num (vector<nntype>, vector<nntype>, nntype &);

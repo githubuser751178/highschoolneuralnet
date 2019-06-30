@@ -67,11 +67,11 @@ vector<train_img> read_mnist (string filename, int size){
 		stringstream ss (line);
 		while (ss.good ()){
 			getline (ss, sval, ',');
-			int val = stoi(sval);
+			double val = stod(sval);
 			if (v_count == 0)
 				label = val;
 			else if(val > 0)
-				pixels[v_count - 1] = 1;
+				pixels[v_count - 1] = (val / 255.0) - .50;
 			v_count += 1;
 		}
 		train_img img = train_img(label, pixels);

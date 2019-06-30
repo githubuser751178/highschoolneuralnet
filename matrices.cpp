@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include <vector>
 #include <random>
 #include <time.h>
@@ -43,7 +44,7 @@ nntype matrix::sum_elements(){
 	nntype ans = 0;
 	for(int i = 0; i < rows; i++){
 		for(int j = 0; j < columns; j++){
-			ans += m[i][j];
+			ans += abs(m[i][j]);
 		}
 	}
 	return ans;
@@ -110,6 +111,22 @@ matrix matrix::plus(matrix m2){
 	}
 	return sum;
 }
+
+matrix matrix::capped_plus(matrix m2, nntype cap){
+	matrix sum(rows, columns);
+	for(int i = 0; i < rows; i++){
+		for(int j = 0; j < columns; j++){
+			nntype e_sum = (m[i][j] + m2.m[i][j]);
+			if(abs(e_sum) > cap){
+				sum.set_element(i, j, cap);
+			} else {
+				sum.set_element(i, j, e_sum );
+			}
+		}
+	}
+	return sum;
+}
+
 matrix matrix::scalar_times(nntype c){
 	matrix product(rows,columns);
 	for(int i=0; i<rows; i++){

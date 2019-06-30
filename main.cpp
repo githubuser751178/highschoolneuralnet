@@ -15,9 +15,9 @@ typedef double nntype;
 //NEURAL NET CONFIG
 bool CHECK_PARTIALS = true;
 int TRAIN_FILE_SIZE = 50000, TEST_FILE_SIZE = 9000;
-int TRAIN_SIZE = 5, TEST_SIZE = 100, TRAIN_ROUNDS = 5;
+int TRAIN_SIZE = 5, TEST_SIZE = 100, EPOCH = 1;
 vector<int> NN_SHAPE = {392, 10};
-nntype STEP_SIZE = .001, APPROX_H = .01;
+nntype LEARNING_RATE = .001, APPROX_H = .01;
 
 nntype percent_error(nntype approx, nntype exact){
 	if(exact == 0){
@@ -28,11 +28,14 @@ nntype percent_error(nntype approx, nntype exact){
 	}
 	return abs(approx - exact) / exact;
 }
+
 nntype time_estimate(nntype inputs){
 	//this is no longer correct
 	return .003503 * pow(inputs, 2) + .19 * inputs + .0706;
 }
 bool partials_match(){
+	return true;
+	/*
 	//randomly generates data set to check symbolic partial
 	int DIM1 = 3, DIM2 = 2, NUM_CHECKS = 10;
 	srand(time(NULL));
@@ -56,7 +59,9 @@ bool partials_match(){
 		}
 	}
 	return true;
+	*/
 }
+
 vector<train_img> get_batch(int size, vector<train_img>& total_set){
 	vector<train_img> batch;
 	randp rng(size);
@@ -67,33 +72,43 @@ vector<train_img> get_batch(int size, vector<train_img>& total_set){
 }
 
 int main () {
-
-	neural_net solve_mnist(NN_SHAPE, 784, STEP_SIZE, APPROX_H);
+	neural_net solve_mnist(784, LEARNING_RATE, APPROX_H);
 	if(CHECK_PARTIALS)
 		cout << "partials match: " << partials_match() << endl;
 
 	vector<train_img> training_set, test_set, entire_train, entire_test;
-	training_set = random_read("mnist_train.csv", TRAIN_FILE_SIZE, TRAIN_SIZE);
-	test_set = random_read("mnist_test.csv", TEST_FILE_SIZE, TEST_SIZE);
+	//training_set = random_read("mnist_train.csv", TRAIN_FILE_SIZE, TRAIN_SIZE);
+	//test_set = random_read("mnist_test.csv", TEST_FILE_SIZE, TEST_SIZE);
+
+	entire_train = read_mnist("mnist_train.csv", 5000);
+	entire_test = read_mnist("mnist_test.csv", 900);
 
 	/*
-	entire_train = read_mnist("mnist_train.csv", 50000);
-	entire_test = read_mnist("mnist_test.csv", 9000);
-	randp train_rand(50000), test_rand(9000);
+	randp train_rand(5000), test_rand(900);
 	for(int i = 0; i < TRAIN_SIZE; i++)
 		training_set.push_back(entire_train[train_rand.next_int()]);	
 	for(int i = 0; i < TEST_SIZE; i++)
 		test_set.push_back(entire_test[test_rand.next_int()]);
 	*/
 
-
 	cout << "train set length: " << training_set.size() << endl;
 	cout << "test percent correct before training: " << solve_mnist.test(test_set) << endl;
 
+	cout << "weight matrix 2 head: " << endl;
+	solve_mnist.weights[0].print(1, 10);
+
 	chrono::steady_clock::time_point begin = chrono::steady_clock::now();
 
-	for(int i = 0; i < TRAIN_ROUNDS; i++){
-		//training_set = get_batch(TRAIN_SIZE, entire_train);
+	for(int i = 0; i < EPOCH; i++){
+		training_set = get_batch(TRAIN_SIZE, entire_train);
+		/*
+		if(i == 4){
+			cout << "pixels: " << endl;
+			for(int j = 0; j < 784; j++)
+				cout << training_set[0].pixels[j] << " ";
+			cout << endl;
+		}
+		*/	
 		solve_mnist.train(training_set);
 	}
 	chrono::steady_clock::time_point end = chrono::steady_clock::now();
@@ -108,6 +123,6 @@ int main () {
 	   for(int i = 0; i < 7; i++){
 	   cout << tester.next_int() << endl;
 	   }
-	   */
+	*/
 	return 0;
 }
