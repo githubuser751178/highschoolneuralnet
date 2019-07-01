@@ -6,32 +6,18 @@
 #include <math.h>
 
 using namespace std;
-// foo
+
 typedef double nntype;
 typedef vector<nntype> nntype_vector;
 
 #define p(x) cout << #x << ": " << x << endl
 
-/*
-//nn_map is a memoization table
-void nn_map::insert(vector<nntype> key, vector<nntype> value){
-	map.push_back(make_pair(key, value));
+
+void print_v(vector<nntype> v){
+	for(nntype x : v){
+		cout << x << " ";
+	} cout << endl;
 }
-vector<nntype> nn_map::at(vector<nntype> key){
-	for(int i = 0; i < map.size(); i++){
-		if(map[i].first == key)
-			return map[i].second;
-	}
-	return {0}; //just here to get rid of compiler warning
-}
-bool nn_map::contains(vector<nntype> key){
-	for(int i = 0; i < map.size(); i++){
-		if(map[i].first == key)
-			return true;
-	}
-	return false;
-}
-*/
 
 neural_net::neural_net(int i, nntype ss, nntype diff){
 	inputs = i;
@@ -45,10 +31,12 @@ neural_net::neural_net(int i, nntype ss, nntype diff){
 	corrections.push_back(blankweight);
 }
 
+//sigmoidal non linear operator
 nntype neural_net::logistic(nntype x){
 	return 1.0 / (1.0 + exp( -x));
 }
 
+//derivative of logistic function
 nntype neural_net::dlogistic(nntype x){
 	return exp(-x) / pow(1 + exp(-x), 2);
 }
@@ -70,6 +58,7 @@ nntype neural_net::error_datum(vector<nntype> input, vector<nntype> target){
 	}
 	return 0.5 * error;
 }
+
 nntype neural_net::error_data
 (vector< vector<nntype> > inputs, vector< vector<nntype> > targets){
 	nntype total_e = 0;
@@ -88,20 +77,15 @@ nntype neural_net::partial_derivative_num (vector<nntype> input, vector<nntype> 
 	return (error_plus_h - error) / differential;
 }
 
-void print_v(vector<nntype> v){
-	for(nntype x : v){
-		cout << x << " ";
-	} cout << endl;
-}
-
-
 nntype neural_net::partial_derivative
 (const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target, int weight_m, int r, int c){
+	/*
 	cout << "output" << endl;
 	print_v(output); 
 	cout << "target" << endl;
 	print_v(target);
 	p(dlogistic(full_connect_output[r]));
+	*/
 	return (output[r] - target[r]) * dlogistic(full_connect_output[r]) * input[c];
 }
 
@@ -111,9 +95,7 @@ void neural_net::learn(const vector<nntype>& input, const vector<nntype>& output
 	for(int i = 0; i < weights.size(); i++){
 		for(int j = 0; j < weights[i].rows; j++){
 			for(int k = 0; k < weights[i].columns; k++){
-				//nntype partial_num = partial_derivative_num(x, target, weights[i].m[j][k]);
 				nntype partial = partial_derivative(input, output, target, i, j, k);
-				cout << "partial: " << partial << endl;
 				/*
 				   cout << "layer: " << i << endl;
 				   cout << "partial num: " << partial_num << endl;
@@ -148,39 +130,22 @@ vector<nntype> neural_net::get_vector(int digit){
 int neural_net::identify (vector<nntype> pixels){
 	return get_digit(activation(pixels));
 }
+
 void neural_net::train (vector<train_img> batch){
 	nntype correct = 0;
 	for (int i = 0; i < corrections.size(); i++)
 		corrections[i].zero();
 	for (int i = 0; i < batch.size(); i++){
-		//cout << "batch i " << i << endl;
 		vector<nntype> output = activation(batch[i].pixels);
 		if (get_digit(output) == batch[i].label)
 			correct += 1;
-		cout << "error: " << error_datum(batch[i].pixels, get_vector(batch[i].label)) << endl;
 		learn(batch[i].pixels, output, get_vector(batch[i].label));
-		cout << "sum elements of corrections: " << corrections[0].sum_elements() << endl;
-		cout << "full connect output: ";
-		for(float j : full_connect_output){
-			cout << j << " ";
-		} cout << endl;
-		cout << "output: ";
-		for(float j : output){
-			cout << j << " ";
-		} cout << endl;
-		p(batch[i].label);
-		cout << "learned on image #" << i << endl;
 	}
 	cout << "training percent correct: " << (100 * (correct / batch.size())) << endl;
 	for (int i = 0; i < corrections.size(); i++) {
-		//assert (corrections[i].sum_elements() != 0);
 		weights[i] = weights[i].plus(corrections[i]);
-	//memo.clear();
 	}
-	cout << "corrections[1]: " << endl;
-	corrections[0].print(1,10);
-	cout << "weights[1]: " << endl;
-	weights[0].print(1,10);
+	cout << "weights updated \n";
 }
 
 nntype neural_net::test (vector<train_img> batch){
