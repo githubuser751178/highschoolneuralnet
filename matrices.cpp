@@ -1,13 +1,4 @@
-#include <iostream>
-#include <cstdlib>
-#include <vector>
-#include <random>
-#include <time.h>
-#include <assert.h>
 #include "neuralnet.hpp"
-
-using namespace std;
-typedef double nntype;
 
 matrix::matrix(int r, int c){
 	rows = r;

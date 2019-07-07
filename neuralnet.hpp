@@ -1,6 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <random>
+#include <time.h>
+#include <vector>
+#include <cmath>
+#include <assert.h>
+
 using namespace std;
 
 typedef double nntype;
@@ -43,64 +48,38 @@ class randp {
 
 class neural_net {
 	public:
-		vector<int> shape;
-		vector<nntype> full_connect_output;
-		int inputs;
-		bool weights_changed;
-		vector<matrix> weights;
-		vector<matrix> corrections;
+		neural_net(nntype, nntype);
+
+		//member variables
+		matrix weights;
+		matrix corrections;
 		nntype step_size;
 		nntype differential;
-		nntype weight_cap;
-		neural_net (int, nntype, nntype);
-		//nn_map activationMemo;
-		vector<nntype> activation(vector<nntype>);
-		nntype logistic (nntype);
-		nntype dlogistic (nntype);
-		nntype error_datum (vector<nntype>, vector<nntype>);
-		nntype error_data (vector< vector<nntype> >, vector< vector<nntype> >);
-		nntype partial_derivative_num (vector<nntype>, vector<nntype>, nntype &);
-		nntype partial_derivative (const vector<nntype>&, const vector<nntype>&, const vector<nntype>&, int, int, int);
-		void learn (const vector<nntype>&, const vector<nntype>&, const vector<nntype>&);
+		bool weights_changed;
+		vector<nntype> full_connect_output;
+		
+		//helper functions
+		nntype logistic(nntype);
+		nntype dlogistic(nntype);
+
 		int get_digit(vector<nntype>);
 		vector<nntype> get_vector(int);
+
+		nntype error_datum(vector<nntype>, vector<nntype>);
+		nntype error_data(vector< vector<nntype> >, vector< vector<nntype> >);
+
+		nntype partial_derivative_num (vector<nntype>, vector<nntype>, nntype &);
+		nntype partial_derivative(const vector<nntype>&, const vector<nntype>&, const vector<nntype>&, int, int);
 		int identify (vector<nntype>);
+
+		//neural net functions
+		vector<nntype> activation(vector<nntype>);
+		void learn (const vector<nntype>&, const vector<nntype>&, const vector<nntype>&);
 		void train (vector<train_img>);
 		nntype test (vector<train_img>);
-		//unordered_map<nntype_vector, nntype_vector, container_hash<nntype_vector>> map;
-		//unordered_map <nntype_vector, nntype_vector, vector_hash> memo;
 };
 
 nntype dot(vector<nntype>, vector<nntype>);
 vector<train_img> read_mnist(string, int);
 vector<train_img> random_read(string, int, int);
 nntype percent_error(nntype, nntype);
-//vector<xor_input> get_inputs(int);
-
-/*
-class nn_map {
-	public:
-		vector<pair<vector<nntype>, vector<nntype> > > map;
-		void insert(vector<nntype>, vector<nntype>);
-		vector<nntype> at(vector<nntype>);
-		bool contains(vector<nntype>);
-};
-
-struct vector_hash{
-    int operator()(const nntype_vector &V) const {
-        int hash=0;
-        for(int i=0;i<V.size();i++) {
-            hash+=V[i]; // Can be anything
-        }
-        return hash;
-    }
-};
-
-class xor_input {
-	public:
-		int label;
-		vector<nntype> target;
-		vector<nntype> things;
-		xor_input(nntype, nntype);
-};
-*/

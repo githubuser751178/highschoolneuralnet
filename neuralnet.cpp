@@ -1,17 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <random>
 #include "neuralnet.hpp"
-#include <assert.h>
-#include <math.h>
-
-using namespace std;
-
-typedef double nntype;
-typedef vector<nntype> nntype_vector;
-
-#define p(x) cout << #x << ": " << x << endl
-
 
 void print_v(vector<nntype> v){
 	for(nntype x : v){
@@ -19,16 +6,12 @@ void print_v(vector<nntype> v){
 	} cout << endl;
 }
 
-neural_net::neural_net(int i, nntype ss, nntype diff){
-	inputs = i;
+neural_net::neural_net(nntype ss, nntype diff) : weights(10, 784), corrections(10, 784){
 	step_size = ss;
 	differential = diff;
 	weights_changed = false;
-	weight_cap = 5;
-	matrix blankweight(10, 784);
-	blankweight.randomize();
-	weights.push_back(blankweight);
-	corrections.push_back(blankweight);
+	weights.randomize();
+	corrections.zero();
 }
 
 //sigmoidal non linear operator
@@ -42,7 +25,7 @@ nntype neural_net::dlogistic(nntype x){
 }
 
 vector<nntype> neural_net::activation(vector<nntype> input){
-	input = weights[0].timesV(input);
+	input = weights.timesV(input);
 	full_connect_output = input;
 	for(int i = 0; i < input.size(); i++){
 		input[i] = logistic(input[i]);
@@ -78,33 +61,31 @@ nntype neural_net::partial_derivative_num (vector<nntype> input, vector<nntype> 
 }
 
 nntype neural_net::partial_derivative
-(const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target, int weight_m, int r, int c){
+(const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target, int r, int c){
 	/*
-	cout << "output" << endl;
-	print_v(output); 
-	cout << "target" << endl;
-	print_v(target);
-	p(dlogistic(full_connect_output[r]));
-	*/
+	   cout << "output" << endl;
+	   print_v(output); 
+	   cout << "target" << endl;
+	   print_v(target);
+	   p(dlogistic(full_connect_output[r]));
+	   */
 	return (output[r] - target[r]) * dlogistic(full_connect_output[r]) * input[c];
 }
 
 void neural_net::learn(const vector<nntype>& input, const vector<nntype>& output, const vector<nntype>& target){
 	//updates corrections for one training image
 	int counter = 0, total = 0;
-	for(int i = 0; i < weights.size(); i++){
-		for(int j = 0; j < weights[i].rows; j++){
-			for(int k = 0; k < weights[i].columns; k++){
-				nntype partial = partial_derivative(input, output, target, i, j, k);
-				/*
-				   cout << "layer: " << i << endl;
-				   cout << "partial num: " << partial_num << endl;
-				   cout << "partial sym: " << partial << endl;
-				   cout << "percent err: " << percent_error(partial, partial_num) << endl;
-				   cout << " ----------- " << endl;
-				*/
-				corrections[i].set_element(j, k, corrections[i].e(j, k) - (step_size * partial));
-			}
+	for(int i = 0; i < weights.rows; i++){
+		for(int j = 0; j < weights.columns; j++){
+			nntype partial = partial_derivative(input, output, target, i, j);
+			/*
+			   cout << "layer: " << i << endl;
+			   cout << "partial num: " << partial_num << endl;
+			   cout << "partial sym: " << partial << endl;
+			   cout << "percent err: " << percent_error(partial, partial_num) << endl;
+			   cout << " ----------- " << endl;
+			   */
+			corrections.set_element(i, j, corrections.e(i, j) - (step_size * partial));
 		}
 	}
 }
@@ -133,19 +114,21 @@ int neural_net::identify (vector<nntype> pixels){
 
 void neural_net::train (vector<train_img> batch){
 	nntype correct = 0;
-	for (int i = 0; i < corrections.size(); i++)
-		corrections[i].zero();
+	corrections.zero();
 	for (int i = 0; i < batch.size(); i++){
 		vector<nntype> output = activation(batch[i].pixels);
 		if (get_digit(output) == batch[i].label)
 			correct += 1;
 		learn(batch[i].pixels, output, get_vector(batch[i].label));
 	}
+	weights = weights.plus(corrections);
+	/*
 	cout << "training percent correct: " << (100 * (correct / batch.size())) << endl;
-	for (int i = 0; i < corrections.size(); i++) {
-		weights[i] = weights[i].plus(corrections[i]);
-	}
-	cout << "weights updated \n";
+	cout << "sum of corrections: " << corrections.sum_elements() << endl;
+	*/
+	//cout << "sum of weights: " << weights.sum_elements() << endl;
+	//cout << "weights updated \n";
+	
 }
 
 nntype neural_net::test (vector<train_img> batch){
