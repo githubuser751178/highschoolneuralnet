@@ -30,6 +30,7 @@ class matrix {
 		matrix plus(matrix);
 		matrix capped_plus(matrix, nntype);
 		matrix scalar_times(nntype);
+		int num_elements();
 };
 class train_img {
 	public:
@@ -48,15 +49,16 @@ class randp {
 
 class neural_net {
 	public:
-		neural_net(nntype, nntype);
+		neural_net(int, nntype, nntype);
 
 		//member variables
-		matrix weights;
-		matrix corrections;
+		vector<matrix> weights;
+		vector<matrix> corrections;	
 		nntype step_size;
 		nntype differential;
 		bool weights_changed;
-		vector<nntype> full_connect_output;
+		vector<nntype> layer_1_output;
+		vector<nntype> layer_2_output;
 		
 		//helper functions
 		nntype logistic(nntype);
@@ -69,8 +71,9 @@ class neural_net {
 		nntype error_data(vector< vector<nntype> >, vector< vector<nntype> >);
 
 		nntype partial_derivative_num (vector<nntype>, vector<nntype>, nntype &);
-		nntype partial_derivative(const vector<nntype>&, const vector<nntype>&, const vector<nntype>&, int, int);
+		nntype partial_derivative(const vector<nntype>&, const vector<nntype>&, const vector<nntype>&, int, int, int);
 		int identify (vector<nntype>);
+		nntype avg_error(vector<train_img>);
 
 		//neural net functions
 		vector<nntype> activation(vector<nntype>);

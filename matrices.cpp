@@ -12,6 +12,11 @@ matrix::matrix(int r, int c){
 nntype matrix::e(int i, int j){
 	return m[i][j];
 }
+
+int matrix::num_elements(){
+	return rows * columns;
+}
+
 void matrix::set_element (int r, int c, nntype e){
 	m[r][c] = e;
 }
